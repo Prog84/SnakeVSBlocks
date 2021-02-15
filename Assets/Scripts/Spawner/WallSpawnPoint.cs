@@ -1,7 +1,3 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class WallSpawnPoint : SpawnPoint
+﻿public class WallSpawnPoint : SpawnPoint
 {
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
@@ -15,15 +13,21 @@ public class Spawner : MonoBehaviour
     [Header("Wall")]
     [SerializeField] private Wall _wallTemplate;
     [SerializeField] private int _wallSpawnChance;
-
+    [Header("Bonus")]
+    [SerializeField] private Bonus _bonusTemplate;
+    [SerializeField] private int _bonusSpawnChance;
 
     private BlockSpawnPoint[] _blockSpawnPoints;
     private WallSpawnPoint[] _wallSpawnPoints;
+    private BonusSpawnPoint[] _bonusSpawnPoints;
 
     private void Start()
     {
         _blockSpawnPoints = GetComponentsInChildren<BlockSpawnPoint>();
         _wallSpawnPoints = GetComponentsInChildren<WallSpawnPoint>();
+        _bonusSpawnPoints = GetComponentsInChildren<BonusSpawnPoint>();
+
+        GenerateBorderWalls(_repeatCount);
 
         for (int i = 0; i < _repeatCount; i++)
         {
@@ -33,6 +37,8 @@ public class Spawner : MonoBehaviour
             MoveSpawner(_ditanceBetweenRandomLine);
             GenerateRandomElements(_wallSpawnPoints, _wallTemplate.gameObject, _wallSpawnChance, _ditanceBetweenRandomLine, _ditanceBetweenRandomLine / 2f);
             GenerateRandomElements(_blockSpawnPoints, _blockTemplate.gameObject, _blockSpawnChance);
+            MoveSpawner(_ditanceBetweenRandomLine);
+            GenerateRandomElements(_bonusSpawnPoints, _bonusTemplate.gameObject, _bonusSpawnChance);
         }
     }
 
@@ -65,5 +71,22 @@ public class Spawner : MonoBehaviour
     private void MoveSpawner(int distanceY)
     {
         transform.position = new Vector3(transform.position.x, transform.position.y + distanceY, transform.position.z);
+    }
+
+    private void GenerateBorderWalls(int countWall)
+    {
+        float startAndEndScreenCount = 2;
+        Vector2 leftTopScreen = Camera.main.ViewportToWorldPoint(new Vector2(0, 1));
+        Vector2 rightTopScreen = Camera.main.ViewportToWorldPoint(new Vector2(1, 1));
+        Vector2 screenHeight = Camera.main.ViewportToWorldPoint(new Vector2(0, 1)) - Camera.main.ViewportToWorldPoint(new Vector2(0, 0));
+
+        for (int currentWall = 0; currentWall < countWall + startAndEndScreenCount; currentWall++)
+        {
+            GameObject element = Instantiate(_wallTemplate.gameObject, new Vector3(leftTopScreen.x, currentWall * screenHeight.y, 0), Quaternion.identity, _container);
+            element.transform.localScale = new Vector3(element.transform.localScale.x, screenHeight.y, element.transform.localScale.z);
+
+            element = Instantiate(_wallTemplate.gameObject, new Vector3(rightTopScreen.x, currentWall * screenHeight.y, 0), Quaternion.identity, _container);
+            element.transform.localScale = new Vector3(element.transform.localScale.x, screenHeight.y, element.transform.localScale.z);
+        }
     }
 }
